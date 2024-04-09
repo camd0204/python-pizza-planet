@@ -2,6 +2,7 @@ from app.plugins import ma
 from .models import Beverage,Ingredient, Size, Order, OrderDetail
 
 class BeverageSerializer(ma.SQLAlchemyAutoSchema):
+    
     class Meta:
         model = Beverage
         load_instance = True
