@@ -1,6 +1,6 @@
 from typing import Any, List, Optional, Sequence
 
-from sqlalchemy.sql import text, column
+from sqlalchemy.sql import text, column, desc, func
 
 from .models import Beverage,Ingredient, Order, OrderDetail, Size, db
 from .serializers import (BeverageSerializer,IngredientSerializer, OrderSerializer,
@@ -89,3 +89,42 @@ class BeverageManager(BaseManager):
     @classmethod
     def get_by_id_list(cls, ids: Sequence):
         return cls.session.query(cls.model).filter(cls.model._id.in_(set(ids))).all() or []
+    
+class ReportManager:
+    session=db.session
+    @classmethod
+    def get_top_ingredient(cls):
+        top_ingredient_query=cls.session.query(Ingredient.name,
+                                               func.count(OrderDetail.ingredient_id).label('total')).join(OrderDetail).group_by(Ingredient.name).order_by(desc('total')).all()
+        top_ingredient={}
+        if top_ingredient_query:
+            top_ingredient={
+                'name':top_ingredient_query[0][0],
+                'total':top_ingredient_query[0][1]
+            }
+        return top_ingredient
+    
+    @classmethod
+    def get_top_customers(cls):
+        top_customers_query=cls.session.query(Order.client_name,
+                                              func.count(Order._id).label('total')).group_by(Order.client_name).order_by(desc('total')).limit(3).all()
+        top_customers={}
+        if top_customers_query:
+            top_customers={
+                'name':top_customers_query[0][0],
+                'total':top_customers_query[0][1]
+            }
+        return top_customers
+    
+    @classmethod
+    def get_most_earning_month(cls):
+        most_earning_month_query=cls.session.query(func.extract('month',Order.date).label('month'),
+                                                   func.sum(Order.total_price).label('total')).group_by(func.extract('month',Order.date)).order_by(desc('total')).all()
+        most_earning_month={}
+        if most_earning_month_query:
+            most_earning_month={
+                'month':most_earning_month_query[0][0],
+                'total':most_earning_month_query[0][1]
+            }
+        return most_earning_month
+        
