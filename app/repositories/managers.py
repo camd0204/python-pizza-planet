@@ -6,7 +6,7 @@ from .models import Beverage,Ingredient, Order, OrderDetail, Size, db
 from .serializers import (BeverageSerializer,IngredientSerializer, OrderSerializer,
                           SizeSerializer, ma)
 
-
+months=['January','February','March','April','May','June','July','August','September','October','November','December']
 class BaseManager:
     model: Optional[db.Model] = None
     serializer: Optional[ma.SQLAlchemyAutoSchema] = None
@@ -108,22 +108,27 @@ class ReportManager:
     def get_top_customers(cls):
         top_customers_query=cls.session.query(Order.client_name,
                                               func.count(Order._id).label('total')).group_by(Order.client_name).order_by(desc('total')).limit(3).all()
-        top_customers={}
-        if top_customers_query:
-            top_customers={
-                'name':top_customers_query[0][0],
-                'total':top_customers_query[0][1]
+        top_customers = []
+        for customer_data in top_customers_query:
+            customer = {
+                'name': customer_data[0],
+                'total': customer_data[1]
             }
+            top_customers.append(customer)
+
+        print(top_customers)
         return top_customers
     
     @classmethod
     def get_most_earning_month(cls):
+        
         most_earning_month_query=cls.session.query(func.extract('month',Order.date).label('month'),
                                                    func.sum(Order.total_price).label('total')).group_by(func.extract('month',Order.date)).order_by(desc('total')).all()
         most_earning_month={}
+        month_to_show=months[most_earning_month_query[0][0]-1]
         if most_earning_month_query:
             most_earning_month={
-                'month':most_earning_month_query[0][0],
+                'month':month_to_show,
                 'total':most_earning_month_query[0][1]
             }
         return most_earning_month
