@@ -125,8 +125,8 @@ class ReportManager:
         most_earning_month_query=cls.session.query(func.extract('month',Order.date).label('month'),
                                                    func.sum(Order.total_price).label('total')).group_by(func.extract('month',Order.date)).order_by(desc('total')).all()
         most_earning_month={}
-        month_to_show=months[most_earning_month_query[0][0]-1]
         if most_earning_month_query:
+            month_to_show=months[most_earning_month_query[0][0]-1]
             most_earning_month={
                 'month':month_to_show,
                 'total':most_earning_month_query[0][1]
