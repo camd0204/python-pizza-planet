@@ -112,3 +112,7 @@ ext install ritwickdey.LiveServer
 ```bash
 python3 manage.py test
 ```
+
+### Diagram to deploy the application GCP
+
+![Alt text](deploydiagram.png)
